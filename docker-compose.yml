@@ -1,0 +1,26 @@
+version: '2'
+volumes:
+    sense-data:
+services:
+  influxdb:
+    restart: always
+    image: arm32v7/influxdb@sha256:2fed9b09a672cab330ac3ea1f03616e6821f2235bda64d549f605ef0d7081911
+    volumes:
+      - 'sense-data:/var/lib/influxdb'
+  grafana:
+    restart: always
+    build: ./grafana
+    ports:
+      - "80"
+    volumes:
+      - 'sense-data:/data'
+    environment:
+        - 'GF_SERVER_HTTP_PORT=80'
+        - 'GF_PATHS_PROVISIONING=/usr/src/app/provisioning'
+        - 'GF_SESSION_PROVIDER=memory'
+    depends_on:
+      - influxdb
+  counter:
+    restart: always
+    build: ./counter
+    privileged: true
